@@ -579,6 +579,22 @@ def configuration_check(config, section):
                                  "'servers' in the section 'pull'")
             configuration_check_for_servers(servers)
 
+    if section == 'process':
+        groups = {'frontend-groups', 'backend-groups', 'server-groups'}
+        configured_groups = groups.intersection(config.sections())
+        if config.has_option('graphite', 'group-namespace'):
+            if not config.has_option('graphite', 'group-namespace-double-writes'):
+                raise ValueError("invalid configuration, no value for option "
+                                 "'group-namespace-double-writes' in the section "
+                                 "'graphite'")
+            if not configured_groups:
+                raise ValueError("invalid configuration, at least one of these "
+                                 "sections should exist: {}".format(groups))
+        else:
+            if configured_groups:
+                raise ValueError("invalid configuration, no value for option "
+                                 "'group-namespace' in the section 'graphite'")
+
 
 def configuration_check_for_servers(servers, option='servers', section='pull'):
     """Perform a sanity check against the values for servers.
