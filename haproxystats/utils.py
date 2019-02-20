@@ -583,10 +583,12 @@ def configuration_check(config, section):
         groups = {'frontend-groups', 'backend-groups', 'server-groups'}
         configured_groups = groups.intersection(config.sections())
         if config.has_option('graphite', 'group-namespace'):
-            if not config.has_option('graphite', 'group-namespace-double-writes'):
-                raise ValueError("invalid configuration, no value for option "
-                                 "'group-namespace-double-writes' in the section "
-                                 "'graphite'")
+            try:
+                config.getboolean('graphite', 'group-namespace-double-writes')
+            except (configparser.Error, ValueError) as exc:
+                raise ValueError("invalid configuration, section:'graphite' "
+                                 "option:'group-namespace-double-writes' "
+                                 "error:{e}".format(e=exc))
             if not configured_groups:
                 raise ValueError("invalid configuration, at least one of these "
                                  "sections should exist: {}".format(groups))
